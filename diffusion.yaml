@@ -1,0 +1,76 @@
+accelerator: 'auto'
+devices: 1
+max_epochs: 120
+seed: 42
+training:
+  out_dir: './out'
+  logfile: 'log.txt'
+  criterion: 'MSE'
+  precision: 'bf16-mixed'
+  ema:
+    enabled: false
+    decay: 0.9999
+    update_after_step: 100
+  early_stopping:
+    enabled: true
+    monitor: 'val loss'
+    mode: 'min'
+    patience: 15
+    min_delta: 1.0e-4
+  swanlab:
+    project: 'OrdinalDiffusion'
+    name: 'diffusion'
+    workspace: null
+    description: null
+    tags: ['diffusion']
+    mode: local
+  checkpoints:
+    save_top_k: 1
+    monitor: 'val loss'
+    mode: 'min'
+    filename: '{epoch}'
+data:
+  name: 'EP'
+  path_to_dataset: '/gpfs/share/home/2301210592/wjf/data/FGADR' #'/gpfs/share/home/2301210592/wjf/data/eyepace'
+  csv_file: '/gpfs/share/home/2301210592/wjf/data/FGADR/DR_Seg_Grading_Label.csv' #'/gpfs/share/home/2301210592/wjf/data/eyepace/trainLabels_processed_with_quality.csv'
+  root_dir: '/gpfs/share/home/2301210592/wjf/data/FGADR/Original_Images/' #'/gpfs/share/home/2301210592/wjf/data/eyepace/train/'
+  vessel_mask_root: '/gpfs/share/home/2301210592/wjf/data/FGADR/seg/'
+  vessel_mask_suffix: '' #'.png'
+  use_imbalanced_sampler: True
+  diffusion_transform: True
+  encoder_transform: False
+  batch_size: 16
+  num_workers: 8
+  image_resolution: 256
+optimizer:
+  name: 'AdamW'
+  kwargs:
+    lr: 3.0e-5
+    weight_decay: 1.0e-4
+scheduler:
+  name: null
+  kwargs: {}
+noise_scheduler:
+  name: 'cosine'
+  num_timesteps: 1000
+  beta_start: 1e-4
+  beta_end: 0.02
+  schedule_type: 'cosine'
+  cosine_s: 0.008
+vae:
+  checkpoint: 'model_weights/VAE/checkpoints/model.pt'
+encoder:
+  checkpoint: 'model_weights/VAE/checkpoints/model.pt'
+model:  #https://github.com/facebookresearch/DiT/blob/main/models.py
+  name: 'DiT'
+  patch_size: 2
+  in_channels: 4
+  hidden_size: 1024
+  depth: 24
+  num_heads: 16
+  mlp_ratio: 4.0
+  ordinal_input: True
+  learned_ordinal_input: False
+  use_structure: False
+  use_vessel_condition: True
+metrics: []
